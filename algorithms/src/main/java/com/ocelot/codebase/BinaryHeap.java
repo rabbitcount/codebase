@@ -1,6 +1,7 @@
 package com.ocelot.codebase;
 
 /**
+ * // add something
  * [DSAAJ] BinaryHeap in chapter 6
  */
 public class BinaryHeap<AnyType extends Comparable<? super AnyType>> {
