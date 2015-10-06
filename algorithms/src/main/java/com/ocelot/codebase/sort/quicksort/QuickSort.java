@@ -1,5 +1,7 @@
 package com.ocelot.codebase.sort.quicksort;
 
+import com.ocelot.codebase.sort.insertion.InsertionSort;
+
 /**
  * 参考 Data Structures and Algorithm Analysis in Java --- Chapter 7.7 QuickSort
  *
@@ -34,15 +36,131 @@ package com.ocelot.codebase.sort.quicksort;
  *************************************************************
  * 3. 如何处理与枢纽元相等的元素
  *   <Q> 当i遇到一个等于枢纽元的元素,及j遇到一个等于枢纽元的元素两种情况下,是否应该停止
- *   <A> i和j的处理策略应该相同,否则可能会造成分割偏向一边
- *   [x]
- *   [v]
+ *   i和j的处理策略应该相同,否则可能会造成分割偏向一边
+ *   考虑极端情况,所有元素相同
+ *   [x] i和j中,一个停止,另一个不停止
+ *       分割子数组不均匀,偏向一侧
+ *   [x] i和j都不停止
+ *       根据现有实现策略,会产生两个非常不均衡的子数组;
+ *       在所有关键字都相同的情况下,运行时间将为O(N2);
+ *   [v] i和j都停止
+ *       在相等的元素间将有很多次交换
+ *       --> 虽然无意义,但是最终i和j将在中间交错,
+ *           当枢纽元被替换时,将建立两个大小基本相等的子数组
+ *       --> 根据归并排序的分析,运行时间为 O(NlogN)
  *************************************************************
  *
  */
 public class QuickSort {
 
+    private static final int CUTOFF = 10;
 
+    /**
+     * Quicksort algorithm.
+     * @param a an array of Comparable items.
+     * @param <AnyType>
+     */
+    public static <AnyType extends Comparable<? super AnyType>>
+        void quicksort(AnyType[] a){
+        quicksort(a, 0, a.length - 1);
+    }
 
+    /**
+     * return median of left, center, and right
+     * Order these and hide the pivot
+     * @param a
+     * @param left
+     * @param right
+     * @param <AnyType>
+     * @return
+     */
+    private static <AnyType extends Comparable<? super AnyType>>
+        AnyType median3(AnyType[] a, int left, int right){
+        int center = (left + right)/2;
+        if(a[center].compareTo(a[left]) < 0)
+            swapReferences(a, left, center);
+        if(a[right].compareTo(a[left]) < 0)
+            swapReferences(a, left, right);
+        if(a[right].compareTo(a[center]) < 0)
+            swapReferences(a, center, right);
+
+        // Place pivot at position right - 1
+        swapReferences(a, center, right - 1);
+        return a[right - 1];
+    }
+
+    /**
+     * Internal quicksort method that makes recursive calls.
+     * Use median-of-three partitioning and a cutoff of 10.
+     *
+     * pivot: create a pivot with median3
+     * for()
+     *   i: stop when larger than pivot
+     *   j: stop when smaller than pivot
+     *   if(i < j) swap
+     *   if(i > j) break
+     * and then exchange pivot and i.
+     * @param a an array of Comparable items.
+     * @param left the left-most index of the subarray. including
+     * @param right the right-most index of the subarray.
+     * @param <AnyType>
+     */
+    private static <AnyType extends Comparable<? super AnyType>>
+        void quicksort(AnyType[] a, int left, int right){
+        if(left + CUTOFF <= right){
+            AnyType pivot = median3(a, left, right);
+
+            // Begin partitioning
+            int i = left, j = right - 1;
+            for(;;){
+                while(a[++i].compareTo(pivot) < 0) { }
+                while(a[--j].compareTo(pivot) > 0) { }
+                if(i < j)
+                    swapReferences(a, i, j);
+                else
+                    break;
+            }
+
+            // Restore pivot
+            swapReferences(a, i, right - 1);
+
+            quicksort(a, left, i - 1);  // Sort small elements
+            quicksort(a, i + 1, right); // Sort large elements
+        }
+        else // Do an insertion sort on the subarray
+            insertionSort(a, left, right);
+    }
+
+    /**
+     * Method to swap to elements in an array.
+     * @param a an array of objects.
+     * @param index1 the index of the first object.
+     * @param index2 the index of the second object.
+     */
+    public static <AnyType> void swapReferences(AnyType[] a, int index1, int index2 )
+    {
+        AnyType tmp = a[ index1 ];
+        a[ index1 ] = a[ index2 ];
+        a[ index2 ] = tmp;
+    }
+
+    /**
+     * Internal insertion sort routine for subarrays
+     * that is used by quicksort.
+     * @param a an array of Comparable items.
+     * @param left the left-most index of the subarray.
+     * @param right the right-most index of the subarray.
+     */
+    private static <AnyType extends Comparable<? super AnyType>>
+        void insertionSort(AnyType[] a, int left, int right) {
+        for (int p = left + 1; p <= right; p++) {
+            AnyType tmp = a[p];
+            int j;
+
+            for (j = p; j > left && tmp.compareTo(a[j - 1]) < 0; j--)
+                a[j] = a[j - 1];
+            a[j] = tmp;
+        }
+    }
 
 }
