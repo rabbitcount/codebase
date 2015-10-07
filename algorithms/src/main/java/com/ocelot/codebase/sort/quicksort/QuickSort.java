@@ -1,6 +1,6 @@
 package com.ocelot.codebase.sort.quicksort;
 
-import com.ocelot.codebase.sort.insertion.InsertionSort;
+import static com.ocelot.codebase.sort.CommonUtils.*;
 
 /**
  * 参考 Data Structures and Algorithm Analysis in Java --- Chapter 7.7 QuickSort
@@ -61,7 +61,7 @@ public class QuickSort {
      * @param <AnyType>
      */
     public static <AnyType extends Comparable<? super AnyType>>
-        void quicksort(AnyType[] a){
+    void quicksort(AnyType[] a) {
         quicksort(a, 0, a.length - 1);
     }
 
@@ -77,11 +77,14 @@ public class QuickSort {
     private static <AnyType extends Comparable<? super AnyType>>
         AnyType median3(AnyType[] a, int left, int right){
         int center = (left + right)/2;
-        if(a[center].compareTo(a[left]) < 0)
+        if(isLessThan(a[center], a[left]))
+//        if(a[center].compareTo(a[left]) < 0)
             swapReferences(a, left, center);
-        if(a[right].compareTo(a[left]) < 0)
+        if(isLessThan(a[right], a[left]))
+//        if(a[right].compareTo(a[left]) < 0)
             swapReferences(a, left, right);
-        if(a[right].compareTo(a[center]) < 0)
+        if(isLessThan(a[right], a[center]))
+//        if(a[right].compareTo(a[center]) < 0)
             swapReferences(a, center, right);
 
         // Place pivot at position right - 1
@@ -106,15 +109,17 @@ public class QuickSort {
      * @param <AnyType>
      */
     private static <AnyType extends Comparable<? super AnyType>>
-        void quicksort(AnyType[] a, int left, int right){
+    void quicksort(AnyType[] a, int left, int right){
         if(left + CUTOFF <= right){
             AnyType pivot = median3(a, left, right);
 
             // Begin partitioning
             int i = left, j = right - 1;
             for(;;){
-                while(a[++i].compareTo(pivot) < 0) { }
-                while(a[--j].compareTo(pivot) > 0) { }
+                while(isLessThan(a[++i], pivot)) { } // i: stop when finding the one which is larger than pivot
+                while(isLargerThan(a[--j], pivot)) { } // j: stop when finding the one which is less than pivot
+//                while(a[++i].compareTo(pivot) < 0) { } // i: stop when finding the one which is larger than pivot
+//                while(a[--j].compareTo(pivot) > 0) { } // j: stop when finding the one which is less than pivot
                 if(i < j)
                     swapReferences(a, i, j);
                 else
@@ -132,19 +137,6 @@ public class QuickSort {
     }
 
     /**
-     * Method to swap to elements in an array.
-     * @param a an array of objects.
-     * @param index1 the index of the first object.
-     * @param index2 the index of the second object.
-     */
-    public static <AnyType> void swapReferences(AnyType[] a, int index1, int index2 )
-    {
-        AnyType tmp = a[ index1 ];
-        a[ index1 ] = a[ index2 ];
-        a[ index2 ] = tmp;
-    }
-
-    /**
      * Internal insertion sort routine for subarrays
      * that is used by quicksort.
      * @param a an array of Comparable items.
@@ -157,7 +149,8 @@ public class QuickSort {
             AnyType tmp = a[p];
             int j;
 
-            for (j = p; j > left && tmp.compareTo(a[j - 1]) < 0; j--)
+            for(j = p; j > left && isLessThan(tmp, a[j - 1]); j--)
+//            for (j = p; j > left && tmp.compareTo(a[j - 1]) < 0; j--)
                 a[j] = a[j - 1];
             a[j] = tmp;
         }
